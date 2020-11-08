@@ -14,7 +14,7 @@
 
 extern uint8_t eeprom_value;
 extern uint8_t sampling_frequency[6];
-extern int i,k;
+extern int i,k,flag;
 
 CY_ISR(eeprom_config)
 {
@@ -23,7 +23,8 @@ CY_ISR(eeprom_config)
         k=0;
         EEPROM_UpdateTemperature();     
         EEPROM_WriteByte(sampling_frequency[k],0x00);
-        eeprom_value = EEPROM_ReadByte(0x00);    
+        eeprom_value = EEPROM_ReadByte(0x00);
+        flag=1;
     }
     else
     {
@@ -31,6 +32,7 @@ CY_ISR(eeprom_config)
         k++; 
         EEPROM_WriteByte(sampling_frequency[k],0x00);
         eeprom_value = EEPROM_ReadByte(0x00); 
+        flag=1;
     }
 }
   
