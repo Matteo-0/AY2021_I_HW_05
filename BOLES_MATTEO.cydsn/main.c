@@ -12,6 +12,7 @@
 #include "project.h"
 #include "I2C_Interface.h"
 #include "ErrorCodes.h"
+#include "ISREEPROM.h"
 
 // Slave device address
 #define LIS3DH_DEVICE_ADDRESS 0x18
@@ -30,16 +31,43 @@
 #define LIS3DH_OUT_YH 0x2B
 #define LIS3DH_OUT_ZH 0x2D
 
+uint8_t eeprom_value;
+uint8_t sampling_frequency[6]={0x17,0x27,0x37,0x47,0x57,0x67};
+int i;
+int k;
+
 int main(void)
 {
     // Enable global interrupts.
     CyGlobalIntEnable; 
 
-    // Start the components.
+    // Start the components and the ISR.
     I2C_Peripheral_Start();
     UART_Start();
     EEPROM_Start();
+    ISR_EEPROM_StartEx(eeprom_config);
     
+    eeprom_value = EEPROM_ReadByte(0x00);
+    
+    for(i=0;i<6;i++)
+    {
+        if (eeprom_value == sampling_frequency[i])
+        {
+            // sovrascrivo valore nel control reg 1
+            k=i;
+        }
+        else
+        {
+            k=0;
+            EEPROM_UpdateTemperature();     
+            EEPROM_WriteByte(sampling_frequency[k],0x00);
+            eeprom_value = EEPROM_ReadByte(0x00);
+            // scrivo nel control reg 1
+    }
+    
+       
+    
+
     for(;;)
     {
         /* Place your application code here. */
