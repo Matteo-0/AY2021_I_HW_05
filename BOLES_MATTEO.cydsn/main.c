@@ -10,6 +10,8 @@
  * ========================================
 */
 #include "project.h"
+#include "I2C_Interface.h"
+#include "ErrorCodes.h"
 
 // Slave device address
 #define LIS3DH_DEVICE_ADDRESS 0x18
@@ -30,10 +32,14 @@
 
 int main(void)
 {
-    CyGlobalIntEnable; /* Enable global interrupts. */
+    // Enable global interrupts.
+    CyGlobalIntEnable; 
 
-    /* Place your initialization/startup code here (e.g. MyInst_Start()) */
-
+    // Start the components.
+    I2C_Peripheral_Start();
+    UART_Start();
+    EEPROM_Start();
+    
     for(;;)
     {
         /* Place your application code here. */
