@@ -28,6 +28,11 @@
                                            uint8_t register_address,
                                            uint8_t data);
     
+    // This function performs a complete reading operation over I2C from a single register.
+    ErrorCode I2C_Peripheral_ReadRegister(uint8_t device_address, 
+                                          uint8_t register_address,
+                                          uint8_t* data);
+    
     // This function performs a complete reading operation over I2C from multiple registers.
     ErrorCode I2C_Peripheral_ReadRegisterMulti(uint8_t device_address,
                                                uint8_t register_address,
