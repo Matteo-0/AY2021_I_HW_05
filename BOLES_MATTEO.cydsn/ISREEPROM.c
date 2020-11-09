@@ -28,8 +28,7 @@ CY_ISR(eeprom_config)
     }
     else
     {
-        EEPROM_UpdateTemperature();    
-        k++; 
+        EEPROM_UpdateTemperature();     
         EEPROM_WriteByte(sampling_frequency[k],0x00);
         eeprom_value = EEPROM_ReadByte(0x00); 
         flag=1;

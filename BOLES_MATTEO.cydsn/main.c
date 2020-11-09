@@ -24,8 +24,8 @@
 #define LIS3DH_CTRL_REG1 0x20
 // Control register 4 address
 #define LIS3DH_CTRL_REG4 0x23
-// Control register 4 configuration (0000 1000). High resolution and full scale range +-2g
-#define LIS3DH_CTRL_REG4_CFG 0x08    
+// Control register 4 configuration (1010 1000). BDU = 1, High resolution and full scale range +-4g
+#define LIS3DH_CTRL_REG4_CFG 0x88    
 // Address of the accelerometer output on the three axis LSB register
 #define LIS3DH_OUT_XL 0x28
 #define LIS3DH_OUT_YL 0x2A
@@ -70,16 +70,12 @@ int main(void)
             else
             {
                 k=0;
-                EEPROM_UpdateTemperature();     
-                EEPROM_WriteByte(sampling_frequency[k],0x00);
-                eeprom_value = EEPROM_ReadByte(0x00);
             }
         }
     }
-                
-    I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
-                                 LIS3DH_CTRL_REG1,
-                                 eeprom_value);
+    
+    // Activate the interrupt
+    ISR_EEPROM_SetPending();
     
     uint8_t ctrl_reg4;
     ctrl_reg4 = LIS3DH_CTRL_REG4_CFG;
@@ -88,26 +84,27 @@ int main(void)
                                  LIS3DH_CTRL_REG4,
                                  ctrl_reg4);
     
-    uint8_t AccelerometerData[6];
-    int16 OutAccX,OutAccY,OutAccZ; 
-    ErrorCode error;
     uint8_t header = 0xA0;
     uint8_t footer = 0xC0;
-    uint8_t OutArray [8];
-    int16 conversion = 1;
-    int16 dirtytrick = 1000;
+    uint8_t OutArray [8]; 
+    OutArray[0] = header;
+    OutArray[7] = footer; 
+    int16 dirtytrick = 1000; 
     float OutAccXConv,OutAccYConv,OutAccZConv;
     
-    OutArray[0] = header;
-    OutArray[7] = footer;
-    
+    uint8_t AccelerometerData[6];
+    int16 OutAccX,OutAccY,OutAccZ; 
+    ErrorCode error;  
+
     for(;;)
     {
         if(flag)
         {
             I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
                                          LIS3DH_CTRL_REG1,
-                                         eeprom_value);  
+                                         eeprom_value); 
+            flag=0;
+            k++;
         }
         
         // Reading the status register
@@ -116,13 +113,14 @@ int main(void)
                                     LIS3DH_STATUS_REG,
                                     &status_register);
         
-            if (status_register == LIS3DH_STATUS_REG_NEW_DATA)
+            if (status_register &= LIS3DH_STATUS_REG_NEW_DATA)
             {
                 // Reading the acceleration data
                 error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
                                                          LIS3DH_OUT_XL,
                                                          6,
-                                                         AccelerometerData);
+                                                         AccelerometerData); 
+
                 // Reconstructing the data if no error occured
                 if(error == NO_ERROR)
                 {  
@@ -130,13 +128,21 @@ int main(void)
                     OutAccY = (int16)((AccelerometerData[2] | (AccelerometerData[3]<<8)))>>4;
                     OutAccZ = (int16)((AccelerometerData[4] | (AccelerometerData[5]<<8)))>>4;
                     
-                    OutAccXConv = OutAccX * conversion;
+                    OutAccXConv=OutAccX*(2*9.81)/2048.0;
+                    OutAccYConv=OutAccY*(2*9.81)/2048.0;
+                    OutAccZConv=OutAccZ*(2*9.81)/2048.0;
+                    
+                    OutAccX = (int16) (OutAccXConv*dirtytrick); 
+                    OutAccY = (int16) (OutAccYConv*dirtytrick);
+                    OutAccZ = (int16) (OutAccZConv*dirtytrick);
+                    
+                    /*OutAccXConv = OutAccX * conversion;
                     OutAccYConv = OutAccY * conversion;
                     OutAccZConv = OutAccZ * conversion;
                     
                     OutAccX = (int16) (OutAccXConv * dirtytrick);
                     OutAccY = (int16) (OutAccYConv * dirtytrick);
-                    OutAccZ = (int16) (OutAccZConv * dirtytrick);
+                    OutAccZ = (int16) (OutAccZConv * dirtytrick);*/
                     
                     OutArray[1] = (uint8_t)(OutAccX & 0xFF);
                     OutArray[2] = (uint8_t)(OutAccX >> 8);
