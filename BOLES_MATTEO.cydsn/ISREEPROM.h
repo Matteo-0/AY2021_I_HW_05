@@ -1,14 +1,13 @@
-/* ========================================
- *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
+/*
+*    \brief header file for the fifth assignment.
+*
+*    This file contains the definition of the ISR activated
+*    by pressing the button
+*
+*    \author Matteo Boles
+*    \date November 14, 2020
 */
+
 #ifndef ISR_EEPROM_H
     #define ISR_EEPROM_H
     

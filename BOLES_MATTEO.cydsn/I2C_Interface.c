@@ -1,14 +1,13 @@
-/* ========================================
- *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
+/*
+*    \brief source file for the fifth assignment.
+*
+*    This file contains the body of the functions used to read and write from registers
+*    along with a function used to check if a device is connected over the I2C lines
+*
+*    \author Matteo Boles
+*    \date November 14, 2020
 */
+
 #include "I2C_Interface.h" 
 #include "I2C_Master.h"
 

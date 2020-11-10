@@ -1,20 +1,23 @@
-/* ========================================
- *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
+/*
+*    \brief source file for the fifth assignment.
+*
+*    This file contains the body of the ISR activated by pressing the button.
+*    In this ISR we save the data corresponding to a certain sampling frequency 
+*    in the EEPROM memory and in a variable called eeprom_value and then we set
+*    a flag to 1 so that when we return in the main we save the correct data for
+*    the sampling frequency in control register 1. 
+*
+*    \author Matteo Boles
+*    \date November 14, 2020
 */
+
 #include "project.h"
 #include "ISREEPROM.h"
 
 extern uint8_t eeprom_value;
 extern uint8_t sampling_frequency[6];
-extern int i,k,flag;
+extern int k;
+extern int flag;
 
 CY_ISR(eeprom_config)
 {

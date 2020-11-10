@@ -1,14 +1,12 @@
-/* ========================================
- *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
+/*
+*    \brief header file for the fifth assignment.
+*
+*    This file contains the definition of some usefull functions
+*
+*    \author Matteo Boles
+*    \date November 14, 2020
 */
+
 #ifndef I2C_Interface_H
     #define I2C_Interface_H
     
