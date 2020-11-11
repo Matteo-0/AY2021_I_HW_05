@@ -14,6 +14,8 @@
 #include "project.h"
 #include "ISREEPROM.h"
 
+#define EEPROM_MEMORY_ADDRESS 0x00
+
 extern uint8_t eeprom_value;
 extern uint8_t sampling_frequency[6];
 extern int k;
@@ -24,18 +26,15 @@ CY_ISR(eeprom_config)
     if(k==6)
     {
         k=0;
-        EEPROM_UpdateTemperature();     
-        EEPROM_WriteByte(sampling_frequency[k],0x00);
-        eeprom_value = EEPROM_ReadByte(0x00);
         flag=1;
     }
     else
     {
-        EEPROM_UpdateTemperature();     
-        EEPROM_WriteByte(sampling_frequency[k],0x00);
-        eeprom_value = EEPROM_ReadByte(0x00); 
         flag=1;
     }
+    EEPROM_UpdateTemperature();     
+    EEPROM_WriteByte(sampling_frequency[k],EEPROM_MEMORY_ADDRESS);
+    eeprom_value = EEPROM_ReadByte(EEPROM_MEMORY_ADDRESS);
 }
   
 /* [] END OF FILE */

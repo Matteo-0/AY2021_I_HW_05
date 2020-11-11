@@ -1,9 +1,9 @@
 /*
 *    \brief Main source file for the fifth assignment.
 *
-*    In this project we set up a I2C master device with
-*    to understand the I2C protocol and communicate with a
-*    a I2C Slave device (LIS3DH Accelerometer).
+*    In this main file we start the components and set up the registers and make
+*    the reading and reconstruction of the acceleration data that are then converted
+*    in m/s^2 and sent via UART to the Bridge Control Panel.
 *
 *    \author Matteo Boles
 *    \date November 14, 2020
@@ -34,13 +34,15 @@
 #define LIS3DH_OUT_XH 0x29
 #define LIS3DH_OUT_YH 0x2B
 #define LIS3DH_OUT_ZH 0x2D
+// Address of EEPROM where we save the data for changing the sampling frequency
+#define EEPROM_MEMORY_ADDRESS 0x00
 
 // Defining some variables
 uint8_t eeprom_value;                                           // Variable where we save the data present in the EEPROM memory
-uint8_t sampling_frequency[6]={0x17,0x27,0x37,0x47,0x57,0x67};  // Array where we save the values for different frequencies
+uint8_t sampling_frequency[6]={0x17,0x27,0x37,0x47,0x57,0x67};  // Array where we save the values for different sampling frequencies
 int i;                                                          // Variable used to move in the different position in the array sampling_frequency
-int k;                                                         
-int t;                                                          // Variable used to move in the different position in the array OutAcc
+int k;                                                          // Variable used to save the position of the sampling_frequency vector in which we are when we turn on the system
+int t;                                                          // Variable used to move in the different position in the arrays OutAcc, OutAccConv and OutArray
 int flag=0;                                                     // Variable that is set to 1 each time we want to change the sampling frequency
 
 int main(void)
@@ -54,13 +56,10 @@ int main(void)
     EEPROM_Start();
     ISR_EEPROM_StartEx(eeprom_config);
     
-    // Check if any device is connected over I2C.
-    I2C_Peripheral_IsDeviceConnected(LIS3DH_DEVICE_ADDRESS);
-    
     // When we turn on the system we check which value is saved in the EEPROM memory.
-    eeprom_value = EEPROM_ReadByte(0x00);
+    eeprom_value = EEPROM_ReadByte(EEPROM_MEMORY_ADDRESS);
     
-    // Checking if in EEPROM there is already a frequency value
+    // Checking if in EEPROM there is already data related to a certain sampling frequency 
     for(i=0;i<6;i++)
     {
         if (eeprom_value == sampling_frequency[i])
@@ -77,10 +76,6 @@ int main(void)
     // We activate the interrupt via software at the beginning.
     ISR_EEPROM_SetPending();
     
-   /* I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
-                                 LIS3DH_CTRL_REG1,
-                                 eeprom_value);*/
-    
     // Writing on control register 4
     uint8_t ctrl_reg4;
     ctrl_reg4 = LIS3DH_CTRL_REG4_CFG;
@@ -92,7 +87,7 @@ int main(void)
     // Defining some variables
     uint8_t header = 0xA0;                       // Packet header
     uint8_t footer = 0xC0;                       // Packet tail
-    uint8_t OutArray [8];                        // Array where we save bytes relative to the acceleration data after conversion to m/s^2
+    uint8_t OutArray [8];                        // Array where we save the bytes to be sent via UART
     OutArray[0] = header;                        // In the first position of the array we save the packet header
     OutArray[7] = footer;                        // In the last position we save the packet tail
     int16 dirtytrick = 1000;                     // Variable used in the conversion process   
@@ -108,6 +103,7 @@ int main(void)
         // Each time we press the button the variable 'flag' is set to 1, so that we can change the sampling frequency
         if(flag)
         {
+            // Writing on control register 1 to change the sampling frequency
             I2C_Peripheral_WriteRegister(LIS3DH_DEVICE_ADDRESS,
                                          LIS3DH_CTRL_REG1,
                                          eeprom_value); 
@@ -117,12 +113,12 @@ int main(void)
         
         // Reading the status register to check if new data are available
         uint8_t status_register; 
-        I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
+        error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
                                     LIS3DH_STATUS_REG,
                                     &status_register);
         
-        // If new data are available    
-        if (status_register &= LIS3DH_STATUS_REG_NEW_DATA)
+        // If no error occured and new data are available    
+        if ((error == NO_ERROR) && (status_register &= LIS3DH_STATUS_REG_NEW_DATA))
         {
             // Reading the acceleration data
             error = I2C_Peripheral_ReadRegisterMulti(LIS3DH_DEVICE_ADDRESS,
@@ -148,6 +144,7 @@ int main(void)
             }
             else
             {
+                // We send a message via UART if any error occured during Acceleration data reading
                 UART_PutString("Error occurred during I2C comm\r\n");   
             } 
         }    

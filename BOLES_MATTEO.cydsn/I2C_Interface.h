@@ -18,9 +18,6 @@
     // This function stops the I2C peripheral from working.
     ErrorCode I2C_Peripheral_Stop(void);
     
-    // This function checks if a device is connected over the I2C lines.
-    uint8_t I2C_Peripheral_IsDeviceConnected(uint8_t device_address);
-    
     // This function performs a complete writing operation over I2C to a single register.
     ErrorCode I2C_Peripheral_WriteRegister(uint8_t device_address,
                                            uint8_t register_address,
