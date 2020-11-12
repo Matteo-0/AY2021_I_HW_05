@@ -4,6 +4,7 @@
 *    This file contains the definition of some usefull functions
 *
 *    \author Matteo Boles
+*    \credits Davide Marzorati
 *    \date November 14, 2020
 */
 

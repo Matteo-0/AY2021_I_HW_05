@@ -14,8 +14,6 @@
 #include "project.h"
 #include "ISREEPROM.h"
 
-#define EEPROM_MEMORY_ADDRESS 0x00
-
 extern uint8_t eeprom_value;
 extern uint8_t sampling_frequency[6];
 extern int k;

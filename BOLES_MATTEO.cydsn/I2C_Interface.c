@@ -5,6 +5,7 @@
 *    along with two functions used to start and stop I2C peripheral.
 *
 *    \author Matteo Boles
+*    \credits Davide Marzorati
 *    \date November 14, 2020
 */
 

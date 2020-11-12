@@ -34,16 +34,22 @@
 #define LIS3DH_OUT_XH 0x29
 #define LIS3DH_OUT_YH 0x2B
 #define LIS3DH_OUT_ZH 0x2D
-// Address of EEPROM where we save the data for changing the sampling frequency
-#define EEPROM_MEMORY_ADDRESS 0x00
+
+// Sampling frequencies
+#define FREQUENCY_1HZ   0x17
+#define FREQUENCY_10HZ  0x27
+#define FREQUENCY_25HZ  0x37
+#define FREQUENCY_50HZ  0x47
+#define FREQUENCY_100HZ 0x57
+#define FREQUENCY_200HZ 0x67
 
 // Defining some variables
 uint8_t eeprom_value;                                           // Variable where we save the data present in the EEPROM memory
-uint8_t sampling_frequency[6]={0x17,0x27,0x37,0x47,0x57,0x67};  // Array where we save the values for different sampling frequencies
+uint8_t sampling_frequency[6]={FREQUENCY_1HZ,FREQUENCY_10HZ,FREQUENCY_25HZ,FREQUENCY_50HZ,FREQUENCY_100HZ,FREQUENCY_200HZ};  // Array where we save the values for different sampling frequencies
 int i;                                                          // Variable used to move in the different position in the array sampling_frequency
 int k;                                                          // Variable used to save the position of the sampling_frequency vector in which we are when we turn on the system
 int t;                                                          // Variable used to move in the different position in the arrays OutAcc, OutAccConv and OutArray
-int flag=0;                                                     // Variable that is set to 1 each time we want to change the sampling frequency
+int flag;                                                       // Variable that is set to 1 each time we want to change the sampling frequency
 
 int main(void)
 {
@@ -85,16 +91,17 @@ int main(void)
                                  ctrl_reg4);
     
     // Defining some variables
+    uint8_t status_register;                     // Variable where we save the data read in the status register
     uint8_t header = 0xA0;                       // Packet header
     uint8_t footer = 0xC0;                       // Packet tail
     uint8_t OutArray [8];                        // Array where we save the bytes to be sent via UART
     OutArray[0] = header;                        // In the first position of the array we save the packet header
-    OutArray[7] = footer;                        // In the last position we save the packet tail
-    int16 dirtytrick = 1000;                     // Variable used in the conversion process   
-       
-    int16 OutAcc[3];                             // Variable where we save the converted acceleration data
-    float OutAccConv[3];                         // Variable used in the conversion process
-    uint8_t AccelerometerData[6];                // Array where we save acceleration data read from the register
+    OutArray[7] = footer;                        // In the last position we save the packet tail   
+    
+    int16 dirtytrick = 1000;                     // Trick used to be able to keep 3 digits in the acceleration data sent via UART because with function PutArray I cannot send float data
+    uint8_t AccelerometerData[6];                // Array where we save acceleration data read from the registers
+    float OutAccConv[3];                         // Array used to save acceleration data converted in m/s^2
+    int16 OutAcc[3];                             // Array where we reconstruct and save the data ready to be sent via UART
                
     ErrorCode error;                             // Variable used to check if any error occured during reading or writing processes
 
@@ -111,11 +118,10 @@ int main(void)
             k++;
         }
         
-        // Reading the status register to check if new data are available
-        uint8_t status_register; 
+        // Reading the status register to check if new data are available 
         error = I2C_Peripheral_ReadRegister(LIS3DH_DEVICE_ADDRESS,
-                                    LIS3DH_STATUS_REG,
-                                    &status_register);
+                                            LIS3DH_STATUS_REG,
+                                            &status_register);
         
         // If no error occured and new data are available    
         if ((error == NO_ERROR) && (status_register &= LIS3DH_STATUS_REG_NEW_DATA))

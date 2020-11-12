@@ -13,6 +13,7 @@
     
     #include "project.h"
     
+    #define EEPROM_MEMORY_ADDRESS 0x00    // Address of EEPROM where we save the data for changing the sampling frequency
     CY_ISR_PROTO(eeprom_config);
     
 #endif
