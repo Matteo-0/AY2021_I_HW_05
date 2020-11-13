@@ -48,7 +48,6 @@ uint8_t eeprom_value;                                           // Variable wher
 uint8_t sampling_frequency[6]={FREQUENCY_1HZ,FREQUENCY_10HZ,FREQUENCY_25HZ,FREQUENCY_50HZ,FREQUENCY_100HZ,FREQUENCY_200HZ};  // Array where we save the values for different sampling frequencies
 int i;                                                          // Variable used to move in the different position in the array sampling_frequency
 int k;                                                          // Variable used to save the position of the sampling_frequency vector in which we are when we turn on the system
-int t;                                                          // Variable used to move in the different position in the arrays OutAcc, OutAccConv and OutArray
 int flag;                                                       // Variable that is set to 1 each time we want to change the sampling frequency
 
 int main(void)
@@ -102,7 +101,8 @@ int main(void)
     uint8_t AccelerometerData[6];                // Array where we save acceleration data read from the registers
     float OutAccConv[3];                         // Array used to save acceleration data converted in m/s^2
     int16 OutAcc[3];                             // Array where we reconstruct and save the data ready to be sent via UART
-               
+    int t;                                       // Variable used to move in the different position in the arrays OutAcc, OutAccConv, OutArray and AccelerometerData     
+    
     ErrorCode error;                             // Variable used to check if any error occured during reading or writing processes
 
     for(;;)
